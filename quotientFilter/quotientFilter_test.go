@@ -2,8 +2,9 @@ package quotientFilter
 
 import (
 	"fmt"
-	"math/rand"
 	"testing"
+
+	"github.com/bits-and-blooms/bitset"
 )
 
 
@@ -31,33 +32,73 @@ func TestBasic(t *testing.T) {
 	}
 }
 
+func TestItCanHandleRepeatedElements(t *testing.T) {
+	q := New(4, 8)
+	elem := []byte("Same Element")
+	ok := q.Insert(elem)
+	if !ok {
+		t.Errorf("%s NOT correctly inserted in.", elem)
+	}
+	ok = q.Insert([]byte("Same Element"))
+	if !ok {
+		t.Errorf("%s NOT correctly inserted in.", elem)
+	}
+	q.Print()
+}
+
 func TestItCanHandleHighLoadFactor(t *testing.T) {
 	q := New(4, 8)
 	elements := make([]string, 0)
-	for i := 0; i < 9; i++ {
-		num := rand.Int()
-		s := fmt.Sprint(num)
+	for i := 4; i >= 0; i-- {
+		s := fmt.Sprint(i)
 		elements = append(elements, s)
 		ok := q.Insert([]byte(s))
 		if !ok {
 			t.Errorf("%s NOT correctly inserted in.", s)
 		}
 	}
-	q.Print()
-	ok := q.Insert([]byte("543"))
-	if !ok {
-		t.Errorf("10 NOT correctly inserted in.")
-	}
 	/*numErrors := 0
 	for i := 0; i < 10; i++ {
-		ok := q.Lookup([]byte(elements[i]))
+		ok := b.Lookup([]byte(elements[i]))
 		if !ok {
 			numErrors++
 		}
 	}
-	ok := q.Lookup([]byte("elements[i]"))
+	ok := b.Lookup([]byte("elements[i]"))
 	if !ok {
 		numErrors++
 	}
 	fmt.Println(numErrors)*/
+}
+
+func TestInsertManually(t *testing.T) {
+	q := New(3, 64)
+	ok := q.insert(7, bitset.From([]uint64{71}))
+	if !ok {
+		t.Errorf("NOT correctly inserted in")
+	}
+	ok = q.insert(1, bitset.From([]uint64{12}))
+	if !ok {
+		t.Errorf("NOT correctly inserted in")
+	}
+	ok = q.insert(4, bitset.From([]uint64{41}))
+	if !ok {
+		t.Errorf("NOT correctly inserted in")
+	}
+	ok = q.insert(1, bitset.From([]uint64{11}))
+	if !ok {
+		t.Errorf("NOT correctly inserted in")
+	}
+	q.Print()
+
+	ok = q.insert(1, bitset.From([]uint64{13}))
+	if !ok {
+		t.Errorf("NOT correctly inserted in")
+	}
+	ok = q.insert(2, bitset.From([]uint64{21}))
+	if !ok {
+		t.Errorf("NOT correctly inserted in")
+	}
+	q.Print()
+
 }

@@ -25,26 +25,20 @@ type QuotientFilter struct {
 
 
 func newQF(n uint, m uint, q uint, r uint, e float64) QuotientFilter {
+	if q+r > 64 {
+		//panic("Error")
+	}
 	return QuotientFilter{
 		n: n,
 		e: e,
 		m: m,
 		r: r,
 		q: q,
-		slots: func() []slot {
-			slots := make([]slot, m)
-			for i := range slots {
-				slots[i].metadata = bitset.New(metadataSize)
-			}
-			return slots
-		}(),
+		slots: make([]slot, m),
 	}
 }
 
 func New(q, r uint) QuotientFilter {
-	if q+r > 64 {
-		panic("Error")
-	}
 	m := computeSizeM(q)
 	n := computeSizeN(m)
 	e := computeError(n, r+q)
@@ -62,32 +56,49 @@ func NewFromSizeAndError(n uint, e float64) QuotientFilter {
 func (q* QuotientFilter) Insert(element []byte) bool {
 	f := getFingerprint(element)
 	fq, fr := q.getQuotientPosAndRest(f)
-	if !q.slots[fq].isOccupied() && q.slots[fq].isEmpty() {
-		q.slots[fq].add(fr, q.q)
-		q.slots[fq].setOccupied()
+	return q.insert(fq, fr)
+}
+
+func (q* QuotientFilter) insert (fq uint, fr *bitset.BitSet) bool {
+	if !q.slots[fq].isOccupied && q.slots[fq].isEmpty() {
+		q.slots[fq].add(fr, q.r)
+		q.slots[fq].isOccupied = true
 		return true
 	}
-	q.slots[fq].setOccupied()
+	q.slots[fq].isOccupied = true
 	start, end := q.scan(fq)
-	fmt.Println(start, end)
-	for i := start; i <= end; i++ {
-		if q.slots[i].get() == fr {
+	fmt.Printf("%d\n\tstart: %d\tend: %d\n", fq, start, end)
+	for i := start; i < end; i++ {
+		if q.slots[i].get().Equal(fr) {
 			return true
-		} else if utils.BitSetToUint(q.slots[i].get()) > utils.BitSetToUint(fr) {
+		}
+		if utils.BitSetToUint(q.slots[i].get()) > utils.BitSetToUint(fr) {
 			q.shiftRight(i)
-			q.slots[i].add(fr, q.q)
+			q.slots[i].add(fr, q.r)
+			if i != start {
+				q.slots[i].isContinuation = true
+			}
+			if i != fq {
+				q.slots[i].isShifted = true
+			}
 			return true
 		}
 	}
-	q.shiftRight(end+1)
-	q.slots[end+1].add(fr, q.q)
+	q.shiftRight(end)
+	q.slots[end].add(fr, q.r)
+	if end != start {
+		q.slots[end].isContinuation = true
+	}
+	if end != fq {
+		q.slots[end].isShifted = true
+	}
 	return true
 }
 
 func (q* QuotientFilter) Lookup(element []byte) bool {
 	f := getFingerprint(element)
 	fq, fr := q.getQuotientPosAndRest(f)
-	if !q.slots[fq].isOccupied() {
+	if !q.slots[fq].isOccupied {
 		return false
 	}
 	start, end := q.scan(fq)
@@ -102,16 +113,15 @@ func (q* QuotientFilter) Lookup(element []byte) bool {
 func (q* QuotientFilter) Delete(element []byte) bool {
 	f := getFingerprint(element)
 	fq, fr := q.getQuotientPosAndRest(f)
-	if !q.slots[fq].isOccupied() {
+	if !q.slots[fq].isOccupied {
 		return true
 	}
 	start, end := q.scan(fq)
-	fmt.Println(start, end)
 	for i := start; i <= end; i++ {
 		if q.slots[i].get().Equal(fr) {
 			q.slots[i].delete()
 			if start == end {
-				q.slots[i].setTo(isOccupied, false)
+				q.slots[i].isOccupied = false
 			} else if i < end {
 				q.shiftLeft(i+1)
 			}
@@ -128,18 +138,25 @@ func (q* QuotientFilter) shiftRight(pos uint) {
 	i := (pos + 1)%q.m
 	for {
 		if q.slots[i].isEmpty() {
-			q.slots[i].add(prev.get(), q.q)
-			q.slots[i].setTo(isContinuation, true)
-			q.slots[i].setTo(isShifted, true)
+			q.slots[i].add(prev.get(), q.r)
+			q.slots[i].isContinuation = true
+			q.slots[i].isShifted = true
 			return
 		}
-		curr := q.slots[i]
-		q.slots[i].add(prev.get(), q.q)
-		q.slots[i].setTo(isContinuation, prev.isContinuation())
-		q.slots[i].setTo(isShifted, prev.isShifted())
-		prev.add(curr.get(), q.q)
-		prev.setTo(isContinuation, curr.isContinuation())
-		prev.setTo(isShifted, curr.isShifted())
+		curr := slot{
+			isOccupied: q.slots[i].isOccupied,
+			isContinuation: q.slots[i].isContinuation,
+			isShifted: q.slots[i].isShifted,
+		}
+		curr.add(q.slots[i].get(), q.r)
+
+		q.slots[i].add(prev.get(), q.r)
+		q.slots[i].isContinuation = prev.isContinuation
+		q.slots[i].isShifted = prev.isShifted
+
+		prev.add(curr.get(), q.r)
+		prev.isContinuation = curr.isContinuation
+		prev.isShifted = curr.isShifted
 		i = (i+1)%q.m
 	}
 }
@@ -147,34 +164,33 @@ func (q* QuotientFilter) shiftRight(pos uint) {
 func (q* QuotientFilter) shiftLeft(pos uint) {
 	i := (pos + 1)%q.m
 	for q.slots[i].get() != nil {
-		q.slots[i-1].add(q.slots[i].get(), q.q)
-		q.slots[i-1].setTo(isContinuation, q.slots[i].isContinuation())
-		q.slots[i-1].setTo(isShifted, q.slots[i].isShifted())
-		q.slots[i].add(nil, q.q)
-		q.slots[i].setTo(isContinuation, false)
-		q.slots[i].setTo(isShifted, false)
+		q.slots[i-1].add(q.slots[i].get(), q.r)
+		q.slots[i-1].isContinuation = q.slots[i].isContinuation
+		q.slots[i-1].isShifted = q.slots[i].isShifted
+		q.slots[i].add(nil, q.r)
+		q.slots[i].isContinuation = false
+		q.slots[i].isShifted = false
 		i = (i+1)%q.m
 	}
 }
 
-
-func (q QuotientFilter) scan(fp uint) (uint, uint) {
-	pos := fp
-	j := pos
-	for q.slots[j].isShifted() {
-		j--
+// scan run of fq such that the run is [start, end)
+func (q QuotientFilter) scan(fq uint) (uint, uint) {
+	j := fq
+	for q.slots[j].isShifted {
+		j = (j-1)%q.m
 	}
-	start := pos
-	for j != pos {
-		for ok := true; ok; ok = q.slots[start].isContinuation() {
+	start := j
+	for j != fq {
+		for ok := true; ok; ok = q.slots[start].isContinuation {
 			start++
 		}
-		for ok := true; ok; ok = !q.slots[j].isOccupied() {
+		for ok := true; ok; ok = !q.slots[j].isOccupied {
 			j++
 		}
 	}
 	end := start
-	for ok := true; ok; ok = q.slots[end].isContinuation() {
+	for ok := true; ok; ok = q.slots[end].isContinuation {
 		end++
 	}
 	return start, end
@@ -190,18 +206,23 @@ func (q QuotientFilter) getQuotientPosAndRest(f uint64) (uint, *bitset.BitSet) {
 	for i := uint(0); i < q.r; i++ {
 		fr.SetTo(i, fingerprint.Test(i))
 	}
-	fp := bitset.New(q.q)
+	fq := bitset.New(q.q)
 	for i := uint(0); i < q.q; i++ {
 		pos := q.r + i
-		fp.SetTo(i, fingerprint.Test(pos))
+		fq.SetTo(i, fingerprint.Test(pos))
 	}
-	return utils.BitSetToUint(fp), fr
+	return utils.BitSetToUint(fq), fr
 }
 
 func (q QuotientFilter) Print() {
 	for _, slot := range q.slots {
-		fmt.Printf("%t\t| %t\t| %t\t| => %v\n", slot.isOccupied(), slot.isContinuation(), slot.isShifted(), slot.get() )
+		s := "empty"
+		if slot.get() != nil {
+			s = fmt.Sprint(utils.BitSetToUint(slot.get()))
+		}
+		fmt.Printf("%t\t| %t\t| %t\t| => %s\n", slot.isOccupied, slot.isContinuation, slot.isShifted, s)
 	}
+	fmt.Println()
 }
 
 
