@@ -89,7 +89,39 @@ func TestInsertManually(t *testing.T) {
 	if !ok {
 		t.Errorf("NOT correctly inserted in")
 	}
-	q.Print()
+	ok = q.insert(2, bitset.From([]uint64{21}))
+	if !ok {
+		t.Errorf("NOT correctly inserted in")
+	}
+	ok = q.insert(2, bitset.From([]uint64{22}))
+	if !ok {
+		t.Errorf("NOT correctly inserted in")
+	}
+	ok = q.insert(1, bitset.From([]uint64{10}))
+	if !ok {
+		t.Errorf("NOT correctly inserted in")
+	}
+	//q.Print()
+}
+
+func TestInsertManuallyAndLookup(t *testing.T) {
+	q := New(3, 64)
+	ok := q.insert(7, bitset.From([]uint64{71}))
+	if !ok {
+		t.Errorf("NOT correctly inserted in")
+	}
+	ok = q.insert(1, bitset.From([]uint64{12}))
+	if !ok {
+		t.Errorf("NOT correctly inserted in")
+	}
+	ok = q.insert(4, bitset.From([]uint64{41}))
+	if !ok {
+		t.Errorf("NOT correctly inserted in")
+	}
+	ok = q.insert(1, bitset.From([]uint64{11}))
+	if !ok {
+		t.Errorf("NOT correctly inserted in")
+	}
 	ok = q.insert(2, bitset.From([]uint64{21}))
 	if !ok {
 		t.Errorf("NOT correctly inserted in")
@@ -103,6 +135,35 @@ func TestInsertManually(t *testing.T) {
 		t.Errorf("NOT correctly inserted in")
 	}
 	q.Print()
+	//LOOKUP
+	ok = q.lookup(7, bitset.From([]uint64{71}))
+	if !ok {
+		t.Errorf("Element should be in the filter")
+	}
+	ok = q.lookup(1, bitset.From([]uint64{12}))
+	if !ok {
+		t.Errorf("Element should be in the filter")
+	}
+	ok = q.lookup(4, bitset.From([]uint64{41}))
+	if !ok {
+		t.Errorf("Element should be in the filter")
+	}
+	ok = q.lookup(1, bitset.From([]uint64{11}))
+	if !ok {
+		t.Errorf("Element should be in the filter")
+	}
+	ok = q.lookup(2, bitset.From([]uint64{21}))
+	if !ok {
+		t.Errorf("Element should be in the filter")
+	}
+	ok = q.lookup(2, bitset.From([]uint64{22}))
+	if !ok {
+		t.Errorf("Element should be in the filter")
+	}
+	ok = q.lookup(1, bitset.From([]uint64{10}))
+	if !ok {
+		t.Errorf("Element should be in the filter")
+	}
 }
 
 func TestReference(t *testing.T) {
