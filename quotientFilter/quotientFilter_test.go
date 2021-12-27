@@ -90,15 +90,30 @@ func TestInsertManually(t *testing.T) {
 		t.Errorf("NOT correctly inserted in")
 	}
 	q.Print()
-
-	ok = q.insert(1, bitset.From([]uint64{13}))
-	if !ok {
-		t.Errorf("NOT correctly inserted in")
-	}
 	ok = q.insert(2, bitset.From([]uint64{21}))
 	if !ok {
 		t.Errorf("NOT correctly inserted in")
 	}
+	ok = q.insert(2, bitset.From([]uint64{22}))
+	if !ok {
+		t.Errorf("NOT correctly inserted in")
+	}
+	ok = q.insert(1, bitset.From([]uint64{10}))
+	if !ok {
+		t.Errorf("NOT correctly inserted in")
+	}
 	q.Print()
+}
 
+func TestReference(t *testing.T) {
+	s1 := slot{
+		reminder: bitset.New(10),
+	}
+	s1.reminder.Set(0)
+	s2 := slot{
+		reminder: bitset.New(s1.reminder.Len()),
+	}
+	s1.reminder.Copy(s2.reminder)
+	println(s1.reminder.Len())
+	println(s2.reminder.Len())
 }
