@@ -122,7 +122,7 @@ func (c *CuckooFilter) hashes(data string) (uint, uint, []byte) {
 	f := h[0:fingerprintSize]
 	i1 := uint(binary.BigEndian.Uint32(h))
 	i2 := i1 ^ uint(binary.BigEndian.Uint32(hash(f)))
-	return i1, i2, []byte(f)
+	return i1, i2, f
 }
 
 func hash(data []byte) []byte {

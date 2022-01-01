@@ -101,7 +101,11 @@ func TestInsertManually(t *testing.T) {
 	if !ok {
 		t.Errorf("NOT correctly inserted in")
 	}
-	//q.Print()
+	ok = q.insert(3, bitset.From([]uint64{33}))
+	if !ok {
+		t.Errorf("NOT correctly inserted in")
+	}
+	q.Print()
 }
 
 func TestInsertManuallyAndLookup(t *testing.T) {
@@ -166,15 +170,45 @@ func TestInsertManuallyAndLookup(t *testing.T) {
 	}
 }
 
-func TestReference(t *testing.T) {
-	s1 := slot{
-		reminder: bitset.New(10),
+func TestInsertManuallyAndDelete(t *testing.T) {
+	q := New(3, 64)
+	ok := q.insert(7, bitset.From([]uint64{71}))
+	if !ok {
+		t.Errorf("NOT correctly inserted in")
 	}
-	s1.reminder.Set(0)
-	s2 := slot{
-		reminder: bitset.New(s1.reminder.Len()),
+	ok = q.insert(1, bitset.From([]uint64{12}))
+	if !ok {
+		t.Errorf("NOT correctly inserted in")
 	}
-	s1.reminder.Copy(s2.reminder)
-	println(s1.reminder.Len())
-	println(s2.reminder.Len())
+	ok = q.insert(4, bitset.From([]uint64{41}))
+	if !ok {
+		t.Errorf("NOT correctly inserted in")
+	}
+	ok = q.insert(1, bitset.From([]uint64{11}))
+	if !ok {
+		t.Errorf("NOT correctly inserted in")
+	}
+	ok = q.insert(2, bitset.From([]uint64{21}))
+	if !ok {
+		t.Errorf("NOT correctly inserted in")
+	}
+	ok = q.insert(2, bitset.From([]uint64{22}))
+	if !ok {
+		t.Errorf("NOT correctly inserted in")
+	}
+	ok = q.insert(1, bitset.From([]uint64{10}))
+	if !ok {
+		t.Errorf("NOT correctly inserted in")
+	}
+	q.Print()
+	//DELETE
+	ok = q.delete(2, bitset.From([]uint64{21}))
+	if !ok {
+		t.Errorf("Element should be removed from the filter")
+	}
+	ok = q.delete(2, bitset.From([]uint64{22}))
+	if !ok {
+		t.Errorf("Element should be removed from the filter")
+	}
+	q.Print()
 }
