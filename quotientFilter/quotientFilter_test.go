@@ -7,7 +7,6 @@ import (
 	"github.com/bits-and-blooms/bitset"
 )
 
-
 func TestBasic(t *testing.T) {
 	q := New(4, 8)
 	elem1 := []byte("Hello World")
@@ -19,7 +18,7 @@ func TestBasic(t *testing.T) {
 	}
 	elem2 := []byte("AB")
 	if ok := q.Insert(elem2); !ok {
-			t.Errorf("%s NOT correctly inserted in.", elem2)
+		t.Errorf("%s NOT correctly inserted in.", elem2)
 	}
 	if ok := q.Lookup(elem2); !ok {
 		t.Errorf("%s should be in.", elem2)

@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	roundTo = 100000
+	roundTo                  = 100000
 	errorRangeFalsePositives = 0.15
 )
 

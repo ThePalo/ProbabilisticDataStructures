@@ -10,10 +10,10 @@ import (
 
 // BloomFilter is the struct that represents a Bloom Filter
 type BloomFilter struct {
-	n uint
-	m uint
-	k uint
-	e float64
+	n    uint
+	m    uint
+	k    uint
+	e    float64
 	bits *bitset.BitSet
 }
 
@@ -52,10 +52,10 @@ func (b BloomFilter) Lookup(element []byte) bool {
 
 func newBF(n uint, e float64, m uint, k uint) BloomFilter {
 	return BloomFilter{
-		n: n,
-		e: e,
-		m: m,
-		k: k,
+		n:    n,
+		e:    e,
+		m:    m,
+		k:    k,
 		bits: bitset.New(m),
 	}
 }
@@ -77,7 +77,7 @@ func computeHash(element []byte, seed uint32) uint {
 }
 
 func computeCapacity(m uint, k uint) uint {
-	return uint(math.Floor(float64(m)/(float64(k))*math.Log(2)))
+	return uint(math.Floor(float64(m) / (float64(k)) * math.Log(2)))
 }
 
 func computeError(m uint, k uint, n uint) float64 {
@@ -85,9 +85,9 @@ func computeError(m uint, k uint, n uint) float64 {
 }
 
 func computeSizeM(n uint, error float64) uint {
-	return uint(math.Ceil(-(float64(n)*math.Log(error))/(math.Log(2)*math.Log(2))))
+	return uint(math.Ceil(-(float64(n) * math.Log(error)) / (math.Log(2) * math.Log(2))))
 }
 
 func computeSizeK(n uint, sizeM uint) uint {
-	return uint(math.Ceil((float64(sizeM)/float64(n))*math.Log(2)))
+	return uint(math.Ceil((float64(sizeM) / float64(n)) * math.Log(2)))
 }

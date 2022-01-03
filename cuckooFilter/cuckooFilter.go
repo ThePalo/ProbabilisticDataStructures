@@ -11,26 +11,26 @@ import (
 )
 
 const (
-	b          = 4
-	defaultP   = uint(8)
-	loadFactor = 0.95
+	b             = 4
+	defaultP      = uint(8)
+	loadFactor    = 0.95
 	maxIterations = 500
-	defaultSeed = 1564534
+	defaultSeed   = 1564534
 )
 
 type CuckooFilter struct {
-	n uint
-	m uint
-	p uint
+	n       uint
+	m       uint
+	p       uint
 	buckets []bucket
 }
 
-func New(m uint, p ...uint) CuckooFilter{
+func New(m uint, p ...uint) CuckooFilter {
 	n := computeCapacity(m)
 	return newCF(n, m, p...)
 }
 
-func NewFromSize(n uint, p...uint) CuckooFilter{
+func NewFromSize(n uint, p ...uint) CuckooFilter {
 	m := computeSizeM(n)
 	return newCF(n, m, p...)
 }
@@ -98,7 +98,7 @@ func (c *CuckooFilter) Delete(element []byte) bool {
 	return false
 }
 
-func newCF (n uint, m uint, p ...uint) CuckooFilter{
+func newCF(n uint, m uint, p ...uint) CuckooFilter {
 	fingerprintSize := defaultP
 	if len(p) > 0 {
 		fingerprintSize = p[0]
@@ -107,7 +107,7 @@ func newCF (n uint, m uint, p ...uint) CuckooFilter{
 		n: n,
 		m: m,
 		p: fingerprintSize,
-		buckets: func (m uint) []bucket {
+		buckets: func(m uint) []bucket {
 			l := make([]bucket, m)
 			for i, _ := range l {
 				l[i] = make(bucket, b)
@@ -158,7 +158,7 @@ func (c CuckooFilter) getAlternativePosition(i uint, f *bitset.BitSet) uint {
 }
 
 func (c CuckooFilter) computeError() float64 {
-	return 2*b/(math.Pow(2, float64(c.p)))
+	return 2 * b / (math.Pow(2, float64(c.p)))
 }
 
 func computeSizeM(size uint) uint {

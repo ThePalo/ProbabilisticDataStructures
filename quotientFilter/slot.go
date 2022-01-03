@@ -7,12 +7,11 @@ import (
 const defaultSize = uint(10)
 
 type slot struct {
-	isOccupied bool
+	isOccupied     bool
 	isContinuation bool
-	isShifted bool
-	reminder *bitset.BitSet
+	isShifted      bool
+	reminder       *bitset.BitSet
 }
-
 
 func (s slot) isEmpty() bool {
 	return s.reminder == nil
@@ -34,10 +33,10 @@ func (s *slot) add(fq *bitset.BitSet) {
 }
 
 func (s slot) getSlot() slot {
-	s1 := slot {
-		isOccupied: s.isOccupied,
+	s1 := slot{
+		isOccupied:     s.isOccupied,
 		isContinuation: s.isContinuation,
-		isShifted: s.isShifted,
+		isShifted:      s.isShifted,
 	}
 	s1.add(s.reminder)
 	return s1
@@ -47,7 +46,7 @@ func (s slot) getReminder() *bitset.BitSet {
 	return s.reminder
 }
 
-func (s *slot) delete()  {
+func (s *slot) delete() {
 	s.reminder = nil
 }
 

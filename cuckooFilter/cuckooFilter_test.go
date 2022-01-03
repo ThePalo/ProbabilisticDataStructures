@@ -113,7 +113,7 @@ func TestInsertAndLookupWithHighLoadFactor(t *testing.T) {
 	}
 
 	expectedFalsePositives := int(float64(elementsToTest) * expectedError)
-	rangeFalsePositives := int(math.Ceil(float64(expectedFalsePositives) * errorRangeFalsePositives)+1)
+	rangeFalsePositives := int(math.Ceil(float64(expectedFalsePositives)*errorRangeFalsePositives) + 1)
 	currentRange := falsePositives - expectedFalsePositives
 	if currentRange > 0 && currentRange > rangeFalsePositives {
 		t.Errorf("Error: Expected false positives are %d ± %d and current false positives are %d", expectedFalsePositives, rangeFalsePositives, falsePositives)
@@ -132,7 +132,7 @@ func TestInsertAndLookupAndDeleteWithHighLoadFactor(t *testing.T) {
 	}
 	// Delete 75% od elements
 	for i := uint(0); i < size; i++ {
-		if i % 4 == 0 {
+		if i%4 == 0 {
 			continue
 		}
 		listElement[i] = fmt.Sprintf("%d", i)
@@ -144,7 +144,7 @@ func TestInsertAndLookupAndDeleteWithHighLoadFactor(t *testing.T) {
 	elementsToTest := int(size)
 	falsePositives := 0
 	for i := uint(0); i < size; i++ {
-		if i % 4 == 0 {
+		if i%4 == 0 {
 			if ok := c.Lookup([]byte(listElement[i])); !ok {
 				t.Errorf("%s should be in.", listElement[i])
 			}
@@ -155,7 +155,7 @@ func TestInsertAndLookupAndDeleteWithHighLoadFactor(t *testing.T) {
 		}
 	}
 	expectedFalsePositives := int(float64(elementsToTest) * c.computeError())
-	rangeFalsePositives := int(math.Ceil(float64(expectedFalsePositives) * errorRangeFalsePositives)+1)
+	rangeFalsePositives := int(math.Ceil(float64(expectedFalsePositives)*errorRangeFalsePositives) + 1)
 	currentRange := falsePositives - expectedFalsePositives
 	if currentRange > 0 && currentRange > rangeFalsePositives {
 		t.Errorf("Error: Expected false positives are %d ± %d and current false positives are %d", expectedFalsePositives, rangeFalsePositives, falsePositives)

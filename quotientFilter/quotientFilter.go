@@ -14,11 +14,11 @@ const (
 )
 
 type QuotientFilter struct {
-	n uint
-	m uint
-	q uint
-	r uint
-	e float64
+	n     uint
+	m     uint
+	q     uint
+	r     uint
+	e     float64
 	slots []slot
 }
 
@@ -27,11 +27,11 @@ func newQF(n uint, m uint, q uint, r uint, e float64) QuotientFilter {
 		//panic("Error")
 	}
 	return QuotientFilter{
-		n: n,
-		e: e,
-		m: m,
-		r: r,
-		q: q,
+		n:     n,
+		e:     e,
+		m:     m,
+		r:     r,
+		q:     q,
 		slots: make([]slot, m),
 	}
 }
@@ -50,7 +50,7 @@ func NewFromSizeAndError(n uint, e float64) QuotientFilter {
 	return newQF(n, m, q, r, e)
 }
 
-func (q* QuotientFilter) Insert(element []byte) bool {
+func (q *QuotientFilter) Insert(element []byte) bool {
 	f := getFingerprint(element)
 	fq, fr := q.getQuotientPosAndRest(f)
 	return q.insert(fq, fr)
@@ -62,7 +62,7 @@ func (q QuotientFilter) Lookup(element []byte) bool {
 	return q.lookup(fq, fr)
 }
 
-func (q* QuotientFilter) Delete(element []byte) bool {
+func (q *QuotientFilter) Delete(element []byte) bool {
 	f := getFingerprint(element)
 	fq, fr := q.getQuotientPosAndRest(f)
 	return q.delete(fq, fr)
@@ -79,7 +79,7 @@ func (q QuotientFilter) Print() {
 	fmt.Println()
 }
 
-func (q* QuotientFilter) insert (fq uint, fr *bitset.BitSet) bool {
+func (q *QuotientFilter) insert(fq uint, fr *bitset.BitSet) bool {
 	if !q.slots[fq].isOccupied && q.slots[fq].isEmpty() {
 		q.slots[fq].add(fr)
 		q.slots[fq].isOccupied = true
@@ -137,7 +137,7 @@ func (q* QuotientFilter) insert (fq uint, fr *bitset.BitSet) bool {
 	return true
 }
 
-func (q* QuotientFilter) shiftRight(pos uint) {
+func (q *QuotientFilter) shiftRight(pos uint) {
 	prev := q.slots[pos].getSlot()
 	i := q.next(pos)
 	for {
@@ -181,7 +181,7 @@ func (q QuotientFilter) lookup(fq uint, fr *bitset.BitSet) bool {
 	return false
 }
 
-func (q* QuotientFilter) delete(fq uint, fr *bitset.BitSet) bool {
+func (q *QuotientFilter) delete(fq uint, fr *bitset.BitSet) bool {
 	if !q.slots[fq].isOccupied {
 		return true
 	}
@@ -212,8 +212,7 @@ func (q* QuotientFilter) delete(fq uint, fr *bitset.BitSet) bool {
 	return false
 }
 
-
-func (q* QuotientFilter) shiftLeft(pos uint, canonicalSlot uint) {
+func (q *QuotientFilter) shiftLeft(pos uint, canonicalSlot uint) {
 	i := q.next(pos)
 	for {
 		if q.slots[i].isEmpty() || q.slots[i].isInitCluster() {
@@ -260,7 +259,7 @@ func (q QuotientFilter) scan(fq uint) (uint, uint) {
 	return start, end
 }
 
-func getFingerprint(element []byte) uint64{
+func getFingerprint(element []byte) uint64 {
 	return murmur3.Sum64(element)
 }
 
@@ -278,12 +277,12 @@ func (q QuotientFilter) getQuotientPosAndRest(f uint64) (uint, *bitset.BitSet) {
 	return utils.BitSetToUint(fq), fr
 }
 
-func (q QuotientFilter) next (i uint) uint {
-	return (i+1)%q.m
+func (q QuotientFilter) next(i uint) uint {
+	return (i + 1) % q.m
 }
 
-func (q QuotientFilter) prev (i uint) uint {
-	return (i-1)%q.m
+func (q QuotientFilter) prev(i uint) uint {
+	return (i - 1) % q.m
 }
 
 func computeSizeQ(size uint) uint {
@@ -291,15 +290,15 @@ func computeSizeQ(size uint) uint {
 }
 
 func computeSizeN(m uint) uint {
-	return uint(float64(m)*loadFactor)
+	return uint(float64(m) * loadFactor)
 }
 
 func computeError(n, p uint) float64 {
-	return float64(n)/math.Pow(2, float64(p))
+	return float64(n) / math.Pow(2, float64(p))
 }
 
 func computeSizeR(size uint, m uint, error float64) uint {
-	return uint(math.Ceil(math.Log10(-float64(size)/(float64(m)*math.Log(1.0-error)))))
+	return uint(math.Ceil(math.Log10(-float64(size) / (float64(m) * math.Log(1.0-error)))))
 }
 
 func computeSizeM(sizeQ uint) uint {
