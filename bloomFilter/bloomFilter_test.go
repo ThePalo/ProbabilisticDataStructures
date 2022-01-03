@@ -8,7 +8,7 @@ import (
 
 const (
 	roundTo = 100000
-	errorRangeFalsePositives = 0.1
+	errorRangeFalsePositives = 0.15
 )
 
 func TestNew(t *testing.T) {
@@ -83,7 +83,7 @@ func TestInsertAndLookup(t *testing.T) {
 
 func TestInsertAndLookupWithHighLoadFactor(t *testing.T) {
 	size := uint(100)
-	e := 0.03
+	e := 0.003
 	b := NewFromSizeAndError(size, e)
 	listElement := make([]string, size)
 	for i := uint(0); i < size; i++ {
@@ -97,16 +97,19 @@ func TestInsertAndLookupWithHighLoadFactor(t *testing.T) {
 		}
 	}
 	// Look up for elements that NOT exists in the filter
-	falsePositives := uint(0)
-	for i := size; i < 2*size; i++ {
-		elem := fmt.Sprintf("%d", i)
+	elementsToTest := 1000000
+	falsePositives := 0
+	for i := uint(0); i < uint(elementsToTest); i++ {
+		toInsert := i + size + 1
+		elem := fmt.Sprintf("%d", toInsert)
 		if ok := b.Lookup([]byte(elem)); ok {
 			falsePositives++
 		}
 	}
-	expectedFalsePositives := uint(float64(size) * e)
-	rangeFalsePositives := uint(math.Ceil(float64(expectedFalsePositives) * errorRangeFalsePositives))
-	if uint(math.Abs(float64(falsePositives - expectedFalsePositives))) < rangeFalsePositives {
+	expectedFalsePositives := int(float64(elementsToTest) * e)
+	rangeFalsePositives := int(math.Ceil(float64(expectedFalsePositives) * errorRangeFalsePositives))
+	currentRange := falsePositives - expectedFalsePositives
+	if currentRange > 0 && currentRange > rangeFalsePositives {
 		t.Errorf("Error: Expected false positives are %d ± %d and current false positives are %d", expectedFalsePositives, rangeFalsePositives, falsePositives)
 	}
 }
