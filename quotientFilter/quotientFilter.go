@@ -46,7 +46,7 @@ func New(q, r uint) QuotientFilter {
 func NewFromSizeAndError(n uint, e float64) QuotientFilter {
 	q := computeSizeQ(n)
 	m := computeSizeM(q)
-	r := computeSizeR(n, m, e)
+	r := computeSizeR(n, q, e)
 	return newQF(n, m, q, r, e)
 }
 
@@ -297,8 +297,8 @@ func computeError(n, p uint) float64 {
 	return float64(n) / math.Pow(2, float64(p))
 }
 
-func computeSizeR(size uint, m uint, error float64) uint {
-	return uint(math.Ceil(math.Log10(-float64(size) / (float64(m) * math.Log(1.0-error)))))
+func computeSizeR(size uint, q uint, error float64) uint {
+	return uint(math.Ceil(math.Log2(-float64(size) / (math.Pow(2, float64(q)) * math.Log(1.0-error)))))
 }
 
 func computeSizeM(sizeQ uint) uint {
