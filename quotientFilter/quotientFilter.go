@@ -22,20 +22,7 @@ type QuotientFilter struct {
 	slots []slot
 }
 
-func newQF(n uint, m uint, q uint, r uint, e float64) QuotientFilter {
-	if q+r > 64 {
-		//panic("Error")
-	}
-	return QuotientFilter{
-		n:     n,
-		e:     e,
-		m:     m,
-		r:     r,
-		q:     q,
-		slots: make([]slot, m),
-	}
-}
-
+// New creates a new Quotient Filter with desired length (in bits) of quotient and reminder
 func New(q, r uint) QuotientFilter {
 	m := computeSizeM(q)
 	n := computeSizeN(m)
@@ -43,6 +30,7 @@ func New(q, r uint) QuotientFilter {
 	return newQF(n, m, q, r, e)
 }
 
+// NewFromSizeAndError creates a new Quotient Filter that can hold n elements with e false positive error
 func NewFromSizeAndError(n uint, e float64) QuotientFilter {
 	q := computeSizeQ(n)
 	m := computeSizeM(q)
@@ -50,24 +38,28 @@ func NewFromSizeAndError(n uint, e float64) QuotientFilter {
 	return newQF(n, m, q, r, e)
 }
 
+// Insert inserts element into BF. Expected computational time: O(1)
 func (q *QuotientFilter) Insert(element []byte) bool {
 	f := getFingerprint(element)
 	fq, fr := q.getQuotientPosAndRest(f)
 	return q.insert(fq, fr)
 }
 
+// Lookup returns true if element may belong to the QF and false if element does not belong to the QF. Expected computational time: O(1)
 func (q QuotientFilter) Lookup(element []byte) bool {
 	f := getFingerprint(element)
 	fq, fr := q.getQuotientPosAndRest(f)
 	return q.lookup(fq, fr)
 }
 
+// Delete deletes element in the filter. Returns true if element has been deleted, false otherwise. Expected computational time: O(1)
 func (q *QuotientFilter) Delete(element []byte) bool {
 	f := getFingerprint(element)
 	fq, fr := q.getQuotientPosAndRest(f)
 	return q.delete(fq, fr)
 }
 
+// Print prints a representation of the current Quotient filter
 func (q QuotientFilter) Print() {
 	for _, slot := range q.slots {
 		s := "empty"
@@ -79,6 +71,20 @@ func (q QuotientFilter) Print() {
 	fmt.Println()
 }
 
+func newQF(n uint, m uint, q uint, r uint, e float64) QuotientFilter {
+	if q+r > 64 {
+		panic("Error")
+	}
+	return QuotientFilter{
+		n:     n,
+		e:     e,
+		m:     m,
+		r:     r,
+		q:     q,
+		slots: make([]slot, m),
+	}
+}
+
 func (q *QuotientFilter) insert(fq uint, fr *bitset.BitSet) bool {
 	if !q.slots[fq].isOccupied && q.slots[fq].isEmpty() {
 		q.slots[fq].add(fr)
@@ -87,9 +93,9 @@ func (q *QuotientFilter) insert(fq uint, fr *bitset.BitSet) bool {
 	}
 	wasOccupied := q.slots[fq].isOccupied
 	q.slots[fq].isOccupied = true
-	start, end := q.scan(fq)
+	start, _ := q.scan(fq)
 	i := start
-	for i != end {
+	for {
 		if q.slots[i].isEmpty() {
 			q.slots[i].add(fr)
 			// Set shifted bit if canonical slot is already in use or not
@@ -100,10 +106,16 @@ func (q *QuotientFilter) insert(fq uint, fr *bitset.BitSet) bool {
 			}
 			return true
 		}
+		if q.slots[i].isInitRun() {
+			break
+		}
 		if q.slots[i].getReminder().Equal(fr) {
 			return true
 		}
 		if utils.BitSetToUint(q.slots[i].getReminder()) > utils.BitSetToUint(fr) {
+			break
+		}
+		if !q.slots[i].isContinuation {
 			break
 		}
 		i = q.next(i)
@@ -186,7 +198,6 @@ func (q *QuotientFilter) delete(fq uint, fr *bitset.BitSet) bool {
 		return true
 	}
 	start, end := q.scan(fq)
-	fmt.Printf("Element: %d\tstart: %d\tend: %d\n", utils.BitSetToUint(fr), start, end)
 	i := start
 	for i != end {
 		if q.slots[i].getReminder().Equal(fr) {

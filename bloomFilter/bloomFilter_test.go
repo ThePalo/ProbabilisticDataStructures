@@ -82,8 +82,8 @@ func TestInsertAndLookup(t *testing.T) {
 }
 
 func TestInsertAndLookupWithHighLoadFactor(t *testing.T) {
-	size := uint(100)
-	e := 0.003
+	size := uint(100000000)
+	e := 0.00003
 	b := NewFromSizeAndError(size, e)
 	listElement := make([]string, size)
 	for i := uint(0); i < size; i++ {

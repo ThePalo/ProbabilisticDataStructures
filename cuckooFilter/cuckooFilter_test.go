@@ -86,8 +86,8 @@ func TestItFailsOnInsertMoreThan2bRepeatedElements(t *testing.T) {
 
 func TestInsertAndLookupWithHighLoadFactor(t *testing.T) {
 	size := uint(1000000)
-	c := NewFromSize(size)
-	expectedError := c.computeError()
+	expectedError := 0.03
+	c := NewFromSizeAndError(size, expectedError)
 	listElement := make([]string, size)
 	for i := uint(0); i < size; i++ {
 		listElement[i] = fmt.Sprintf("%d", i)
@@ -122,7 +122,8 @@ func TestInsertAndLookupWithHighLoadFactor(t *testing.T) {
 
 func TestInsertAndLookupAndDeleteWithHighLoadFactor(t *testing.T) {
 	size := uint(100000)
-	c := NewFromSize(size)
+	expectedError := 0.003
+	c := NewFromSizeAndError(size, expectedError)
 	listElement := make([]string, size)
 	for i := uint(0); i < size; i++ {
 		listElement[i] = fmt.Sprintf("%d", i)
