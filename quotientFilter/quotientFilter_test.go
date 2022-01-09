@@ -14,10 +14,10 @@ const errorRangeFalsePositives = 0.1
 func TestNewFromSizeAndError(t *testing.T) {
 	qFList := []QuotientFilter{
 		{
-			n: 1000000,
-			m: 500,
-			q: 10,
-			r: 20,
+			n: 1000,
+			m: 2048,
+			q: 11,
+			r: 6,
 			e: 0.01,
 		},
 	}
@@ -49,40 +49,22 @@ func TestItCanHandleRepeatedElements(t *testing.T) {
 	if !ok {
 		t.Errorf("%s NOT correctly inserted in.", elem)
 	}
-	ok = q.Insert([]byte("Same Element"))
+	ok = q.Insert(elem)
 	if !ok {
 		t.Errorf("%s NOT correctly inserted in.", elem)
 	}
-	q.Print()
-}
-
-func TestItCanHandleHighLoadFactor(t *testing.T) {
-	q := New(4, 8)
-	elements := make([]string, 0)
-	for i := 4; i >= 0; i-- {
-		s := fmt.Sprint(i)
-		elements = append(elements, s)
-		ok := q.Insert([]byte(s))
-		if !ok {
-			t.Errorf("%s NOT correctly inserted in.", s)
-		}
-	}
-	/*numErrors := 0
-	for i := 0; i < 10; i++ {
-		ok := b.Lookup([]byte(elements[i]))
-		if !ok {
-			numErrors++
-		}
-	}
-	ok := b.Lookup([]byte("elements[i]"))
+	ok = q.Delete(elem)
 	if !ok {
-		numErrors++
+		t.Errorf("%s NOT correctly deleted from.", elem)
 	}
-	fmt.Println(numErrors)*/
+	ok = q.Lookup(elem)
+	if ok {
+		t.Errorf("%s should NOT be in.", elem)
+	}
 }
 
 func TestInsertAndLookupWithHighLoadFactor(t *testing.T) {
-	size := uint(9000000)
+	size := uint(100000)
 	e := 0.01
 	q := NewFromSizeAndError(size, e)
 	listElement := make([]string, size)
@@ -109,7 +91,6 @@ func TestInsertAndLookupWithHighLoadFactor(t *testing.T) {
 			falsePositives++
 		}
 	}
-
 	expectedFalsePositives := int(float64(elementsToTest) * e)
 	rangeFalsePositives := int(math.Ceil(float64(expectedFalsePositives)*errorRangeFalsePositives) + 1)
 	currentRange := falsePositives - expectedFalsePositives
@@ -119,7 +100,7 @@ func TestInsertAndLookupWithHighLoadFactor(t *testing.T) {
 }
 
 func TestInsertAndLookupAndDeleteWithHighLoadFactor(t *testing.T) {
-	size := uint(10000000)
+	size := uint(100000)
 	e := 0.001
 	q := NewFromSizeAndError(size, e)
 	listElement := make([]string, size)
@@ -129,23 +110,31 @@ func TestInsertAndLookupAndDeleteWithHighLoadFactor(t *testing.T) {
 			t.Errorf("%s NOT correctly inserted.", listElement[i])
 		}
 	}
-	// Delete 75% od elements
+	falsePositives := 0
+	elementsToTest := int(size)
+	numberOfCollisions := 0
+	// Delete 75% of elements
 	for i := uint(0); i < size; i++ {
 		if i%4 == 0 {
 			continue
 		}
 		listElement[i] = fmt.Sprintf("%d", i)
 		if ok := q.Delete([]byte(listElement[i])); !ok {
-			t.Errorf("%s should be deleted in.", listElement[i])
+			numberOfCollisions++
 		}
 	}
+	if numberOfCollisions > 0  {
+		t.Logf("Delete has performed %d collisions", numberOfCollisions)
+	}
+
 	// Check if elements are correctly deleted
-	elementsToTest := int(size)
-	falsePositives := 0
+	elementsToTest = int(size)
+	falsePositives = 0
+	numberOfCollisions = 0
 	for i := uint(0); i < size; i++ {
 		if i%4 == 0 {
 			if ok := q.Lookup([]byte(listElement[i])); !ok {
-				t.Errorf("%s should be in.", listElement[i])
+				numberOfCollisions++
 			}
 			continue
 		}
@@ -158,6 +147,9 @@ func TestInsertAndLookupAndDeleteWithHighLoadFactor(t *testing.T) {
 	currentRange := falsePositives - expectedFalsePositives
 	if currentRange > 0 && currentRange > rangeFalsePositives {
 		t.Errorf("Error: Expected false positives are %d ± %d and current false positives are %d", expectedFalsePositives, rangeFalsePositives, falsePositives)
+	}
+	if numberOfCollisions > 0  {
+		t.Logf("Lookup after delete has performed %d collisions", numberOfCollisions)
 	}
 
 }
