@@ -38,11 +38,18 @@ func NewFromSizeAndError(n uint, e float64) QuotientFilter {
 	return newQF(n, m, q, r, e)
 }
 
-// Insert inserts element into BF. Expected computational time: O(1)
+// Insert inserts element into QF. Expected computational time: O(1)
 func (q *QuotientFilter) Insert(element []byte) bool {
 	f := getFingerprint(element)
 	fq, fr := q.getQuotientPosAndRest(f)
-	return q.insert(fq, fr)
+	return q.insert(fq, fr, false)
+}
+
+// InsertUnique inserts element into QF if element is not already inserted. Returns true if element has been inserted or already exists, false otherwise. Expected computational time: O(1)
+func (q *QuotientFilter) InsertUnique(element []byte) bool {
+	f := getFingerprint(element)
+	fq, fr := q.getQuotientPosAndRest(f)
+	return q.insert(fq, fr, true)
 }
 
 // Lookup returns true if element may belong to the QF and false if element does not belong to the QF. Expected computational time: O(1)
@@ -85,7 +92,7 @@ func newQF(n uint, m uint, q uint, r uint, e float64) QuotientFilter {
 	}
 }
 
-func (q *QuotientFilter) insert(fq uint, fr *bitset.BitSet) bool {
+func (q *QuotientFilter) insert(fq uint, fr *bitset.BitSet, unique bool) bool {
 	if q.slots[fq].isEmpty() {
 		q.slots[fq].add(fr)
 		q.slots[fq].isOccupied = true
@@ -101,7 +108,10 @@ func (q *QuotientFilter) insert(fq uint, fr *bitset.BitSet) bool {
 		// Search for the position in the existing run
 		for {
 			if q.slots[i].getReminder().Equal(fr) {
-				return true
+				if unique {
+					return true
+				}
+				break
 			}
 			if utils.BitSetToUint(q.slots[i].getReminder()) > utils.BitSetToUint(fr) {
 				break

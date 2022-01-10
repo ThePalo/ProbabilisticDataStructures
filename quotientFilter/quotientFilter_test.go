@@ -156,35 +156,35 @@ func TestInsertAndLookupAndDeleteWithHighLoadFactor(t *testing.T) {
 
 func TestInsertManually(t *testing.T) {
 	q := New(3, 64)
-	ok := q.insert(7, bitset.From([]uint64{71}))
+	ok := q.insert(7, bitset.From([]uint64{71}), true)
 	if !ok {
 		t.Errorf("NOT correctly inserted in")
 	}
-	ok = q.insert(1, bitset.From([]uint64{12}))
+	ok = q.insert(1, bitset.From([]uint64{12}), true)
 	if !ok {
 		t.Errorf("NOT correctly inserted in")
 	}
-	ok = q.insert(4, bitset.From([]uint64{41}))
+	ok = q.insert(4, bitset.From([]uint64{41}), true)
 	if !ok {
 		t.Errorf("NOT correctly inserted in")
 	}
-	ok = q.insert(1, bitset.From([]uint64{11}))
+	ok = q.insert(1, bitset.From([]uint64{11}), true)
 	if !ok {
 		t.Errorf("NOT correctly inserted in")
 	}
-	ok = q.insert(2, bitset.From([]uint64{21}))
+	ok = q.insert(2, bitset.From([]uint64{21}), true)
 	if !ok {
 		t.Errorf("NOT correctly inserted in")
 	}
-	ok = q.insert(2, bitset.From([]uint64{22}))
+	ok = q.insert(2, bitset.From([]uint64{22}), true)
 	if !ok {
 		t.Errorf("NOT correctly inserted in")
 	}
-	ok = q.insert(1, bitset.From([]uint64{10}))
+	ok = q.insert(1, bitset.From([]uint64{10}), true)
 	if !ok {
 		t.Errorf("NOT correctly inserted in")
 	}
-	ok = q.insert(3, bitset.From([]uint64{33}))
+	ok = q.insert(3, bitset.From([]uint64{33}), true)
 	if !ok {
 		t.Errorf("NOT correctly inserted in")
 	}
@@ -192,31 +192,31 @@ func TestInsertManually(t *testing.T) {
 
 func TestInsertManuallyAndLookup(t *testing.T) {
 	q := New(3, 64)
-	ok := q.insert(7, bitset.From([]uint64{71}))
+	ok := q.insert(7, bitset.From([]uint64{71}), true)
 	if !ok {
 		t.Errorf("NOT correctly inserted in")
 	}
-	ok = q.insert(1, bitset.From([]uint64{12}))
+	ok = q.insert(1, bitset.From([]uint64{12}), true)
 	if !ok {
 		t.Errorf("NOT correctly inserted in")
 	}
-	ok = q.insert(4, bitset.From([]uint64{41}))
+	ok = q.insert(4, bitset.From([]uint64{41}), true)
 	if !ok {
 		t.Errorf("NOT correctly inserted in")
 	}
-	ok = q.insert(1, bitset.From([]uint64{11}))
+	ok = q.insert(1, bitset.From([]uint64{11}), true)
 	if !ok {
 		t.Errorf("NOT correctly inserted in")
 	}
-	ok = q.insert(2, bitset.From([]uint64{21}))
+	ok = q.insert(2, bitset.From([]uint64{21}), true)
 	if !ok {
 		t.Errorf("NOT correctly inserted in")
 	}
-	ok = q.insert(2, bitset.From([]uint64{22}))
+	ok = q.insert(2, bitset.From([]uint64{22}), true)
 	if !ok {
 		t.Errorf("NOT correctly inserted in")
 	}
-	ok = q.insert(1, bitset.From([]uint64{10}))
+	ok = q.insert(1, bitset.From([]uint64{10}), true)
 	if !ok {
 		t.Errorf("NOT correctly inserted in")
 	}
@@ -253,31 +253,31 @@ func TestInsertManuallyAndLookup(t *testing.T) {
 
 func TestInsertManuallyAndDelete(t *testing.T) {
 	q := New(3, 64)
-	ok := q.insert(7, bitset.From([]uint64{71}))
+	ok := q.insert(7, bitset.From([]uint64{71}), true)
 	if !ok {
 		t.Errorf("NOT correctly inserted in")
 	}
-	ok = q.insert(1, bitset.From([]uint64{12}))
+	ok = q.insert(1, bitset.From([]uint64{12}), true)
 	if !ok {
 		t.Errorf("NOT correctly inserted in")
 	}
-	ok = q.insert(4, bitset.From([]uint64{41}))
+	ok = q.insert(4, bitset.From([]uint64{41}), true)
 	if !ok {
 		t.Errorf("NOT correctly inserted in")
 	}
-	ok = q.insert(1, bitset.From([]uint64{11}))
+	ok = q.insert(1, bitset.From([]uint64{11}), true)
 	if !ok {
 		t.Errorf("NOT correctly inserted in")
 	}
-	ok = q.insert(2, bitset.From([]uint64{21}))
+	ok = q.insert(2, bitset.From([]uint64{21}), true)
 	if !ok {
 		t.Errorf("NOT correctly inserted in")
 	}
-	ok = q.insert(2, bitset.From([]uint64{22}))
+	ok = q.insert(2, bitset.From([]uint64{22}), true)
 	if !ok {
 		t.Errorf("NOT correctly inserted in")
 	}
-	ok = q.insert(1, bitset.From([]uint64{10}))
+	ok = q.insert(1, bitset.From([]uint64{10}), true)
 	if !ok {
 		t.Errorf("NOT correctly inserted in")
 	}
