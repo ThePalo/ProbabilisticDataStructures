@@ -1,9 +1,11 @@
 package utils
 
 import (
+	"encoding/csv"
 	"math"
 	"math/bits"
 	"math/rand"
+	"os"
 
 	"github.com/bits-and-blooms/bitset"
 )
@@ -30,4 +32,21 @@ func Sample(i uint, j uint) uint {
 		return i
 	}
 	return j
+}
+
+func ReadDataset() ([][]byte, error) {
+	csvFile, err := os.Open("../pyTwitterApi/dataset.csv")
+	if err != nil {
+		return [][]byte{}, err
+	}
+	defer csvFile.Close()
+	csvLines, err := csv.NewReader(csvFile).ReadAll()
+	if err != nil {
+		return [][]byte{}, err
+	}
+	var usernames [][]byte
+	for _, line := range csvLines {
+		usernames = append(usernames, []byte(line[0]))
+	}
+	return usernames, nil
 }

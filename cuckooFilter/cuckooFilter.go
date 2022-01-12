@@ -23,6 +23,7 @@ type CuckooFilter struct {
 	m       uint
 	p       uint
 	seed    uint32
+	count   uint
 	buckets []bucket
 }
 
@@ -49,6 +50,7 @@ func NewFromSizeAndError(n uint, e float64, op... uint) CuckooFilter {
 func (c *CuckooFilter) Insert(element []byte) bool {
 	i, j, f := c.computeHashPositionsAndFingerprint(element)
 	if c.insert(i, j, f) {
+		c.count++
 		return true
 	}
 	return false
@@ -149,10 +151,7 @@ func (c CuckooFilter) computeHashPositionsAndFingerprint(element []byte) (uint, 
 }
 
 func computeHash(element []byte, seed uint32) uint {
-	if utils.RunningIn64BitMachine() {
-		return uint(murmur3.Sum64WithSeed(element, seed))
-	}
-	return uint(murmur3.Sum32WithSeed(element, seed))
+	return uint(murmur3.Sum64WithSeed(element, seed))
 }
 
 func (c CuckooFilter) getPositionAndFingerprint(hash uint) (uint, *bitset.BitSet) {

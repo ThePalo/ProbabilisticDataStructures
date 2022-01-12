@@ -1,7 +1,6 @@
 package bloomFilter
 
 import (
-	"ProbabilisticDataStructures/utils"
 	"math"
 
 	"github.com/bits-and-blooms/bitset"
@@ -10,10 +9,11 @@ import (
 
 // BloomFilter is the struct that represents a Bloom Filter
 type BloomFilter struct {
-	n    uint
-	m    uint
-	k    uint
-	e    float64
+	n     uint
+	m     uint
+	k     uint
+	e     float64
+	count uint
 	bits *bitset.BitSet
 }
 
@@ -37,6 +37,7 @@ func (b *BloomFilter) Insert(element []byte) {
 	for _, pos := range positions {
 		b.bits.Set(pos)
 	}
+	b.count++
 }
 
 // Lookup returns true if element may belong to the BF and false if element does not belong to the BF. Computational time: O(k)
@@ -56,6 +57,7 @@ func newBF(n uint, e float64, m uint, k uint) BloomFilter {
 		e:    e,
 		m:    m,
 		k:    k,
+		count: 0,
 		bits: bitset.New(m),
 	}
 }
@@ -70,10 +72,7 @@ func (b BloomFilter) computeKHashPositions(element []byte) []uint {
 }
 
 func computeHash(element []byte, seed uint32) uint {
-	if utils.RunningIn64BitMachine() {
-		return uint(murmur3.Sum64WithSeed(element, seed))
-	}
-	return uint(murmur3.Sum32WithSeed(element, seed))
+	return uint(murmur3.Sum64WithSeed(element, seed))
 }
 
 func computeCapacity(m uint, k uint) uint {

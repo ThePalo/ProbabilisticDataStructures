@@ -1,5 +1,5 @@
 .idea
 *.png
 *.csv
-analysis/pyTwitterApi/bearer_token.txt
+pyTwitterApi/bearer_token.txt
 .DS_Store

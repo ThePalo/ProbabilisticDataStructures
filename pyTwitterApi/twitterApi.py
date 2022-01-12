@@ -2,6 +2,7 @@ import requests
 import os
 import json
 import csv
+import pandas as pd
 
 # To set your environment variables in your terminal run the following line:
 # export 'BEARER_TOKEN'='<your_bearer_token>'
@@ -38,16 +39,36 @@ def connect_to_endpoint(url, writer):
         )
 
 
-def main():
+def cleanDataset():
+    file_name = "dataset.csv"
+    file_name_output = "dataset.csv"
+
+    df = pd.read_csv(file_name, sep="\t")
+    # Notes:
+    # - the `subset=None` means that every column is used
+    #    to determine if two rows are different; to change that specify
+    #    the columns as an array
+    # - the `inplace=True` means that the data structure is changed and
+    #   the duplicate rows are gone
+    df.drop_duplicates(subset=None, inplace=True)
+
+    # Write the results to a different file
+    df.to_csv(file_name_output, index=False)
+
+def getData():
     f = open('dataset.csv', 'a')
     writer = csv.writer(f)
 
     url = create_url()
     timeout = 0
-    while timeout < 40000:
+    while timeout < 250000:
         connect_to_endpoint(url, writer)
         timeout += 1
     f.close()
+
+def main():
+    #getData()
+    cleanDataset()
 
 
 if __name__ == "__main__":

@@ -19,6 +19,7 @@ type QuotientFilter struct {
 	q     uint
 	r     uint
 	e     float64
+	count uint
 	slots []slot
 }
 
@@ -38,7 +39,7 @@ func NewFromSizeAndError(n uint, e float64) QuotientFilter {
 	return newQF(n, m, q, r, e)
 }
 
-// Insert inserts element into QF. Expected computational time: O(1)
+// Insert inserts element into QF. Expected computational time: O(1). Returns true if element has been inserted or already exists, false otherwise. Expected computational time: O(1)
 func (q *QuotientFilter) Insert(element []byte) bool {
 	f := getFingerprint(element)
 	fq, fr := q.getQuotientPosAndRest(f)
@@ -138,6 +139,7 @@ func (q *QuotientFilter) insert(fq uint, fr *bitset.BitSet, unique bool) bool {
 		insertSlot.isShifted = false
 	}
 	q.shiftRightAndInsert(i, insertSlot)
+	q.count++
 	return true
 }
 
