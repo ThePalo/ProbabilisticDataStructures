@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/csv"
+	"fmt"
 	"math"
 	"math/bits"
 	"math/rand"
@@ -35,6 +36,11 @@ func Sample(i uint, j uint) uint {
 }
 
 func ReadDataset() ([][]byte, error) {
+	//return CreateBigDataset()
+	return ReadDatasetFromCsv()
+}
+
+func ReadDatasetFromCsv() ([][]byte, error) {
 	csvFile, err := os.Open("../pyTwitterApi/dataset.csv")
 	if err != nil {
 		return [][]byte{}, err
@@ -49,4 +55,65 @@ func ReadDataset() ([][]byte, error) {
 		usernames = append(usernames, []byte(line[0]))
 	}
 	return usernames, nil
+}
+
+func ReadDatasetFromCsvAndFixLengthTo150k() ([][]byte, error) {
+	csvFile, err := os.Open("../pyTwitterApi/dataset.csv")
+	if err != nil {
+		return [][]byte{}, err
+	}
+	defer csvFile.Close()
+	csvLines, err := csv.NewReader(csvFile).ReadAll()
+	if err != nil {
+		return [][]byte{}, err
+	}
+	var usernames [][]byte
+	for i := 0; i < 150000; i++ {
+		usernames = append(usernames, []byte(csvLines[i][0]))
+	}
+	return usernames, nil
+}
+
+func ReadDatasetFromCsvAndFixLengthTo(size int) ([][]byte, error) {
+	csvFile, err := os.Open("../pyTwitterApi/dataset.csv")
+	if err != nil {
+		return [][]byte{}, err
+	}
+	defer csvFile.Close()
+	csvLines, err := csv.NewReader(csvFile).ReadAll()
+	if err != nil {
+		return [][]byte{}, err
+	}
+	var usernames [][]byte
+	for i := 0; i < size; i++ {
+		usernames = append(usernames, []byte(csvLines[i][0]))
+	}
+	return usernames, nil
+}
+
+func CreateBigDataset() ([][]byte, error) {
+	size := 100000000
+	dataset := make([][]byte, size)
+	for i, _ := range dataset {
+		dataset[i] = []byte(fmt.Sprint(i))
+	}
+	return dataset, nil
+}
+
+func CreateDataset() ([][]byte, error) {
+	size := 300000
+	dataset := make([][]byte, size)
+	for i, _ := range dataset {
+		dataset[i] = []byte(fmt.Sprint(i))
+	}
+	return dataset, nil
+}
+
+func CreateRandomDataset() ([][]byte, error) {
+	size := 30000
+	dataset := make([][]byte, size)
+	for i, _ := range dataset {
+		dataset[i] = []byte(fmt.Sprint(rand.Int()))
+	}
+	return dataset, nil
 }
