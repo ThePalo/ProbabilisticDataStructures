@@ -1,6 +1,7 @@
 package bloomFilter
 
 import (
+	"ProbabilisticDataStructures/utils"
 	"math"
 
 	"github.com/bits-and-blooms/bitset"
@@ -13,7 +14,6 @@ type BloomFilter struct {
 	m     uint
 	k     uint
 	e     float64
-	count uint
 	bits *bitset.BitSet
 }
 
@@ -37,7 +37,6 @@ func (b *BloomFilter) Insert(element []byte) {
 	for _, pos := range positions {
 		b.bits.Set(pos)
 	}
-	b.count++
 }
 
 // Lookup returns true if element may belong to the BF and false if element does not belong to the BF. Computational time: O(k)
@@ -51,13 +50,20 @@ func (b BloomFilter) Lookup(element []byte) bool {
 	return true
 }
 
+// TotalSize returns an estimation (in bytes) of the size of the array that represents BF.
+func (b BloomFilter) TotalSize() uint {
+	if b.m % utils.ByteSize == 0 {
+		return b.m/utils.ByteSize
+	}
+	return b.m/utils.ByteSize + 1
+}
+
 func newBF(n uint, e float64, m uint, k uint) BloomFilter {
 	return BloomFilter{
 		n:    n,
 		e:    e,
 		m:    m,
 		k:    k,
-		count: 0,
 		bits: bitset.New(m),
 	}
 }

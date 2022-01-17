@@ -79,6 +79,15 @@ func (q QuotientFilter) Print() {
 	fmt.Println()
 }
 
+// TotalSize returns an estimation (in bytes) of the size of the array that represents QF.
+func (q QuotientFilter) TotalSize() uint {
+	sizeR := q.r/utils.ByteSize
+	if q.r % utils.ByteSize != 0 {
+		sizeR++
+	}
+	return q.m * ((3 * utils.ByteSize) + sizeR)
+}
+
 func newQF(n uint, m uint, q uint, r uint, e float64) QuotientFilter {
 	if q+r > 64 {
 		//panic("Error")

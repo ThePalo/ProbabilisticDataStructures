@@ -12,6 +12,7 @@ import (
 )
 
 const Machine64Bits = 64
+const ByteSize = 8
 
 func NextPowerOf2(i uint) uint {
 	if i < 2 {

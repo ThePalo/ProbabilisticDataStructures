@@ -90,9 +90,13 @@ func (c *CuckooFilter) Delete(element []byte) bool {
 	return false
 }
 
-// GetSeed returns the seed used to build the hash function
-func (c CuckooFilter) GetSeed() uint32 {
-	return c.seed
+// TotalSize returns an estimation (in bytes) of the size of the array that represents CF.
+func (c CuckooFilter) TotalSize() uint {
+	sizeP := c.p/utils.ByteSize
+	if c.p % utils.ByteSize != 0 {
+		sizeP++
+	}
+	return c.m * b * sizeP
 }
 
 func newCF(n uint, m uint, p ...uint) CuckooFilter {

@@ -3,3 +3,4 @@
 *.csv
 pyTwitterApi/bearer_token.txt
 .DS_Store
+charts

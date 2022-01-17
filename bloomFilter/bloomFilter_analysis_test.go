@@ -226,3 +226,154 @@ func TestFPRateWhileInserting(t *testing.T) {
 	w.Flush()
 	resultsFile.Close()
 }
+
+var proofs = []proof{
+	// Tenths
+	{
+		e: 0.10,
+	},
+	// Hundredths
+	{
+		e: 0.09,
+	},
+	{
+		e: 0.08,
+	},
+	{
+		e: 0.07,
+	},
+	{
+		e: 0.06,
+	},
+	{
+		e: 0.05,
+	},
+	{
+		e: 0.04,
+	},
+	{
+		e: 0.03,
+	},
+	{
+		e: 0.02,
+	},
+	{
+		e: 0.01,
+	},
+	// Thousandths
+	{
+		e: 0.009,
+	},
+	{
+		e: 0.008,
+	},
+	{
+		e: 0.007,
+	},
+	{
+		e: 0.006,
+	},
+	{
+		e: 0.005,
+	},
+	{
+		e: 0.004,
+	},
+	{
+		e: 0.003,
+	},
+	{
+		e: 0.002,
+	},
+	{
+		e: 0.001,
+	},
+	// Ten-thousandths
+	{
+		e: 0.0009,
+	},
+	{
+		e: 0.0008,
+	},
+	{
+		e: 0.0007,
+	},
+	{
+		e: 0.0006,
+	},
+	{
+		e: 0.0005,
+	},
+	{
+		e: 0.0004,
+	},
+	{
+		e: 0.0003,
+	},
+	{
+		e: 0.0002,
+	},
+	{
+		e: 0.0001,
+	},
+}
+
+func TestSizeInFunctionOfErrorRate(t *testing.T) {
+	n := 41943040
+	results := make([][]string, len(proofs))
+	for k, pr := range proofs {
+		f := NewFromSizeAndError(uint(n), pr.e)
+		results[k] = []string{fmt.Sprint(pr.e), fmt.Sprint(f.TotalSize())}
+	}
+	resultsFile, err := os.Create(fmt.Sprintf("../results/BF_size_n:%d.csv", n))
+	if err != nil {
+		t.Fatal(err)
+	}
+	w := csv.NewWriter(resultsFile)
+
+	//Title
+	err = w.Write([]string{"error", "size"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, elem := range results {
+		err = w.Write(elem)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	w.Flush()
+	resultsFile.Close()
+}
+
+
+func TestBitsPerSlotInFunctionOfErrorRate(t *testing.T) {
+	n := 150000
+	results := make([][]string, len(proofs))
+	for k, pr := range proofs {
+		f := NewFromSizeAndError(uint(n), pr.e)
+		println(f.m, f.e, f.k)
+		results[k] = []string{fmt.Sprint(pr.e), fmt.Sprint(f.k)}
+	}
+	resultsFile, err := os.Create(fmt.Sprintf("../results/BF_bits_per_element_n:%d.csv", n))
+	if err != nil {
+		t.Fatal(err)
+	}
+	w := csv.NewWriter(resultsFile)
+
+	//Title
+	err = w.Write([]string{"error", "size"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, elem := range results {
+		err = w.Write(elem)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	w.Flush()
+	resultsFile.Close()
+}

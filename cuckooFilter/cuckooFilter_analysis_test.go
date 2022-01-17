@@ -1,4 +1,4 @@
-package quotientFilter
+package cuckooFilter
 
 import (
 	"ProbabilisticDataStructures/utils"
@@ -20,7 +20,7 @@ func TestThroughputInsert(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	n := len(usernames)
+	n := uint(len(usernames))
 	proofs := []proof {
 		{
 			e: 0.03,
@@ -37,7 +37,7 @@ func TestThroughputInsert(t *testing.T) {
 	for k, pr := range proofs {
 		results[k] = make([]int64, n)
 		for i := 0; i < arithmeticMean; i++ {
-			f := NewFromSizeAndError(uint(n), pr.e)
+			f := NewFromSizeAndError(n, pr.e)
 			for j, user := range usernames {
 				start := time.Now()
 				ok := f.Insert(user)
@@ -49,7 +49,7 @@ func TestThroughputInsert(t *testing.T) {
 			}
 		}
 	}
-	resultsFile, err := os.Create(fmt.Sprintf("../results/QF_Insert_n:%d.csv", n))
+	resultsFile, err := os.Create(fmt.Sprintf("../results/CF_Insert_n:%d.csv", n))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -68,7 +68,7 @@ func TestThroughputInsert(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for i := 0; i < n; i++ {
+	for i := uint(0); i < n; i++ {
 		keep := make([]string, len(results))
 		for j := 0; j < len(results); j++ {
 			keep[j] = fmt.Sprint(results[j][i]/arithmeticMean)
@@ -87,7 +87,7 @@ func TestThroughputLookup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	n := len(usernames)
+	n := uint(len(usernames))
 	proofs := []proof {
 		{
 			e: 0.03,
@@ -104,7 +104,7 @@ func TestThroughputLookup(t *testing.T) {
 	for k, pr := range proofs {
 		results[k] = make([]int64, n)
 		for i := 0; i < arithmeticMean; i++ {
-			f := NewFromSizeAndError(uint(n), pr.e)
+			f := NewFromSizeAndError(n, pr.e)
 			for _, user := range usernames {
 				ok := f.Insert(user)
 				if !ok {
@@ -122,7 +122,7 @@ func TestThroughputLookup(t *testing.T) {
 			}
 		}
 	}
-	resultsFile, err := os.Create(fmt.Sprintf("../results/QF_Lookup_n:%d.csv", n))
+	resultsFile, err := os.Create(fmt.Sprintf("../results/CF_Lookup_n:%d.csv", n))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -141,7 +141,7 @@ func TestThroughputLookup(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for i := 0; i < n; i++ {
+	for i := uint(0); i < n; i++ {
 		keep := make([]string, len(results))
 		for j := 0; j < len(results); j++ {
 			keep[j] = fmt.Sprint(results[j][i]/arithmeticMean)
@@ -160,7 +160,7 @@ func TestThroughputDelete(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	n := len(usernames)
+	n := uint(len(usernames))
 	proofs := []proof {
 		{
 			e: 0.03,
@@ -177,7 +177,7 @@ func TestThroughputDelete(t *testing.T) {
 	for k, pr := range proofs {
 		results[k] = make([]int64, n)
 		for i := 0; i < arithmeticMean; i++ {
-			f := NewFromSizeAndError(uint(n), pr.e)
+			f := NewFromSizeAndError(n, pr.e)
 			for _, user := range usernames {
 				ok := f.Insert(user)
 				if !ok {
@@ -195,7 +195,7 @@ func TestThroughputDelete(t *testing.T) {
 			}
 		}
 	}
-	resultsFile, err := os.Create(fmt.Sprintf("../results/QF_Delete_n:%d.csv", n))
+	resultsFile, err := os.Create(fmt.Sprintf("../results/CF_Delete_n:%d.csv", n))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -214,7 +214,7 @@ func TestThroughputDelete(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for i := 0; i < n; i++ {
+	for i := uint(0); i < n; i++ {
 		keep := make([]string, len(results))
 		for j := 0; j < len(results); j++ {
 			keep[j] = fmt.Sprint(results[j][i]/arithmeticMean)
@@ -227,6 +227,7 @@ func TestThroughputDelete(t *testing.T) {
 	w.Flush()
 	resultsFile.Close()
 }
+
 
 func TestFPRateWhileInserting(t *testing.T) {
 	datasetSize := 126000
@@ -261,7 +262,7 @@ func TestFPRateWhileInserting(t *testing.T) {
 			for aux < bunch && insertPoint < datasetSize {
 				ok := f.Insert(usernames[insertPoint])
 				if !ok {
-					t.Fatalf("insertion has fail in insertion %d, when load factor is %f", insertPoint, float64(insertPoint)/float64(f.m))
+					t.Fatalf("insertion has fail in insertion %d, when load factor is %f", insertPoint, float64(insertPoint)/float64(f.m * b))
 				}
 				insertPoint++
 				aux++
@@ -279,7 +280,7 @@ func TestFPRateWhileInserting(t *testing.T) {
 			}
 		}
 	}
-	resultsFile, err := os.Create(fmt.Sprintf("../results/QF_FP_n:%d_bunch:%d_1.csv", n, bunch))
+	resultsFile, err := os.Create(fmt.Sprintf("../results/CF_FP_n:%d_bunch:%d_1.csv", n, bunch))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -337,10 +338,11 @@ func TestFPRateWhenFilterIsAtMaxAllowedCapacity(t *testing.T) {
 	for k, pr := range proofs {
 		results[k] = make([]float64, lenP)
 		f := NewFromSizeAndError(uint(datasetSize), pr.e)
+		fmt.Println(f.m, f.p)
 		for i, user := range usernames {
 			ok := f.Insert(user)
 			if !ok {
-				t.Fatalf("insertion has fail in insertion %d, when load factor is %f", i, float64(i)/float64(f.m))
+				t.Fatalf("insertion has fail in insertion %d, when load factor is %f", i, float64(i)/float64(f.m * b))
 			}
 		}
 		for j := 0; j < arithmeticMean; j++ {
@@ -357,7 +359,7 @@ func TestFPRateWhenFilterIsAtMaxAllowedCapacity(t *testing.T) {
 			}
 		}
 	}
-	resultsFile, err := os.Create(fmt.Sprintf("../results/QF_FP_n:%d_2.csv", datasetSize))
+	resultsFile, err := os.Create(fmt.Sprintf("../results/CF_FP_n:%d_2.csv", datasetSize))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -382,6 +384,155 @@ func TestFPRateWhenFilterIsAtMaxAllowedCapacity(t *testing.T) {
 			keep[j] = fmt.Sprint(results[j][i]/float64(arithmeticMean))
 		}
 		err = w.Write(keep)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	w.Flush()
+	resultsFile.Close()
+}
+
+var proofs = []proof{
+	// Tenths
+	{
+		e: 0.10,
+	},
+	// Hundredths
+	{
+		e: 0.09,
+	},
+	{
+		e: 0.08,
+	},
+	{
+		e: 0.07,
+	},
+	{
+		e: 0.06,
+	},
+	{
+		e: 0.05,
+	},
+	{
+		e: 0.04,
+	},
+	{
+		e: 0.03,
+	},
+	{
+		e: 0.02,
+	},
+	{
+		e: 0.01,
+	},
+	// Thousandths
+	{
+		e: 0.009,
+	},
+	{
+		e: 0.008,
+	},
+	{
+		e: 0.007,
+	},
+	{
+		e: 0.006,
+	},
+	{
+		e: 0.005,
+	},
+	{
+		e: 0.004,
+	},
+	{
+		e: 0.003,
+	},
+	{
+		e: 0.002,
+	},
+	{
+		e: 0.001,
+	},
+	// Ten-thousandths
+	{
+		e: 0.0009,
+	},
+	{
+		e: 0.0008,
+	},
+	{
+		e: 0.0007,
+	},
+	{
+		e: 0.0006,
+	},
+	{
+		e: 0.0005,
+	},
+	{
+		e: 0.0004,
+	},
+	{
+		e: 0.0003,
+	},
+	{
+		e: 0.0002,
+	},
+	{
+		e: 0.0001,
+	},
+}
+
+func TestSizeInFunctionOfErrorRate(t *testing.T) {
+	n := 150000
+	results := make([][]string, len(proofs))
+	for k, pr := range proofs {
+		f := NewFromSizeAndError(uint(n), pr.e)
+		results[k] = []string{fmt.Sprint(pr.e), fmt.Sprint(f.TotalSize())}
+	}
+	resultsFile, err := os.Create(fmt.Sprintf("../results/CF_size_n:%d.csv", n))
+	if err != nil {
+		t.Fatal(err)
+	}
+	w := csv.NewWriter(resultsFile)
+
+	//Title
+	err = w.Write([]string{"error", "size"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, elem := range results {
+		err = w.Write(elem)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	w.Flush()
+	resultsFile.Close()
+}
+
+func TestBitsPerSlotInFunctionOfErrorRate(t *testing.T) {
+	n := 41943040
+	results := make([][]string, len(proofs))
+	for k, pr := range proofs {
+		f := NewFromSizeAndError(uint(n), pr.e)
+		results[k] = []string{fmt.Sprint(pr.e), fmt.Sprint(f.p)}
+	}
+	resultsFile, err := os.Create(fmt.Sprintf("../results/CF_bits_per_element_n:%d.csv", n))
+	if err != nil {
+		t.Fatal(err)
+	}
+	w := csv.NewWriter(resultsFile)
+
+	//Title
+	err = w.Write([]string{"error", "size"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, elem := range results {
+		err = w.Write(elem)
 		if err != nil {
 			t.Fatal(err)
 		}
